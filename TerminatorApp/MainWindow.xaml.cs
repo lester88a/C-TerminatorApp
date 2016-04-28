@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -26,26 +27,83 @@ namespace TerminatorApp
         //external IP variable
         public static string exIP = getExternalIP.getExIp();
         public static string appName = "None";
+        //file locations
+        string fileFullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+        string fileLocation = System.AppDomain.CurrentDomain.BaseDirectory;
+
+        string fileName = "";
 
         public MainWindow()
         {
             InitializeComponent();
+            //get the app name
+            fileName = fileFullPath.Remove(0, fileLocation.Length);
+
+           
         }
 
         //when the application is loaded
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //
-            //assign the exIP to textbox
-            textBoxLocalIP.Text = exIP;
-            textBoxAppName.Text = "SummonerFactoryClient"; //set default application name
-            textBoxStatus.Text = "Auto detected the external IP: " + exIP + "\n";
+            try
+            {
+               
+                //textBoxStatus.Text += "The Auto run function setup successful!"+ "\n";
+                //assign the exIP to textbox
+                textBoxLocalIP.Text = exIP;
+                textBoxAppName.Text = "SummonerFactoryClient"; //set default application name
+                textBoxStatus.Text += "Auto detected the external IP: " + exIP + "\n";
+            }
+            catch (Exception)
+            {
+
+                textBoxStatus.Text += "The Auto run function setup failed!" + "\n";
+            }
+           
 
         }
 
         //start button
         private void btnStart_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                //auto startup when system boot
+                if (autoRunCheckBox.IsChecked.GetValueOrDefault())
+                {
+                    textBoxStatus.Text += "AutoRun ON: " + autoRunCheckBox.IsChecked.GetValueOrDefault() + "\n";
+
+                    // The path to the key where Windows looks for startup applications
+                    RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+                    if (!IsStartupItem())
+                    {
+                        // Add the value in the registry so that the application runs at startup
+                        rkApp.SetValue(fileName, fileFullPath);
+                    }
+                }
+                else
+                {
+                    textBoxStatus.Text += "AutoRun OFF: " + autoRunCheckBox.IsChecked.GetValueOrDefault() + "\n";
+
+                    // The path to the key where Windows looks for startup applications
+                    RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+                    if (IsStartupItem())
+                    {
+                        // Remove the value from the registry so that the application doesn't start
+                        rkApp.DeleteValue(fileName, false);
+                    }
+                }
+            }
+            catch (Exception exs)
+            {
+
+                textBoxStatus.Text += "Errors: " + exs + "\n";
+            }
+            
+
             textBoxStatus.Text += "Application starts working...\n";
             //assign the exIP and appName from textBox
             //make sure user input a valid IP address 
@@ -104,13 +162,25 @@ namespace TerminatorApp
                 }
             }
         }
-
+        //help button
         private void lblHelp_Click(object sender, RoutedEventArgs e)
         {
             string msg = "Created By: Lester\nEmail:lester88a@gmail.com\n\n1.Open the application that needs to terminate and Connect VPN\n2.Type the VPN IP address or use default\n3.Type the app name or use default\n4.Click Start button\n5.Enjoy:)";
             MessageBox.Show(msg);
         }
+        //auto run Boolean
+        private bool IsStartupItem()
+        {
+            // The path to the key where Windows looks for startup applications
+            RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
+            if (rkApp.GetValue(fileName) == null)
+                // The value doesn't exist, the application is not set to run at startup
+                return false;
+            else
+                // The value exists, the application is set to run at startup
+                return true;
+        }
         
     }
 }

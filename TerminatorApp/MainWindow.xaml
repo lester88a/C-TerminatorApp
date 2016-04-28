@@ -12,6 +12,7 @@
         <Label x:Name="lblAppName" Content="App Name:" HorizontalAlignment="Left" Margin="19,122,0,0" VerticalAlignment="Top" FontSize="14"/>
         <TextBox x:Name="textBoxAppName" HorizontalAlignment="Left" Height="35" Margin="19,155,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="200" FontSize="14"/>
         <Button x:Name="lblHelp" Content="Help?" HorizontalAlignment="Left" Margin="428,10,0,0" VerticalAlignment="Top" Width="45" Background="White" BorderBrush="White" Foreground="#FFC7C7C7" Click="lblHelp_Click"/>
+        <CheckBox x:Name="autoRunCheckBox" Content="Autorun on windows starts" HorizontalAlignment="Left" Margin="19,222,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
